@@ -18,7 +18,7 @@ const Upload = () => {
   const { toast } = useToast();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [imageUrls, setImageUrls] = useState(['']);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
 
   if (!user || !isContributor) {
@@ -32,34 +32,29 @@ const Upload = () => {
     );
   }
 
-  const addImageUrlField = () => {
-    setImageUrls([...imageUrls, '']);
-  };
-
-  const updateImageUrl = (index: number, value: string) => {
-    const newUrls = [...imageUrls];
-    newUrls[index] = value;
-    setImageUrls(newUrls);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setImageFiles(Array.from(e.target.files));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const validUrls = imageUrls.filter(url => url.trim() !== '');
-    
-    if (validUrls.length === 0) {
-      toast({ title: 'Please add at least one image URL', variant: 'destructive' });
+    if (imageFiles.length === 0) {
+      toast({ title: 'Please select at least one image', variant: 'destructive' });
       setLoading(false);
       return;
     }
 
+    // Create the profile first
     const { data: profile, error: profileError } = await supabase
       .from('color_profiles')
       .insert({
         name,
         description,
-        contributor_id: user.id,
+        user_id: user.id,
       } as any)
       .select()
       .single();
@@ -70,8 +65,38 @@ const Upload = () => {
       return;
     }
 
-    const imageInserts = validUrls.map(url => ({
-      color_profile_id: (profile as any).id,
+    // Upload images to storage and collect URLs
+    const uploadedUrls: string[] = [];
+    
+    for (const file of imageFiles) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${profile.id}/${Date.now()}-${Math.random()}.${fileExt}`;
+      
+      const { error: uploadError, data } = await supabase.storage
+        .from('profile-images')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        toast({ title: 'Error uploading image', description: uploadError.message, variant: 'destructive' });
+        continue;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-images')
+        .getPublicUrl(fileName);
+      
+      uploadedUrls.push(publicUrl);
+    }
+
+    if (uploadedUrls.length === 0) {
+      toast({ title: 'No images were uploaded successfully', variant: 'destructive' });
+      setLoading(false);
+      return;
+    }
+
+    // Insert image records
+    const imageInserts = uploadedUrls.map(url => ({
+      profile_id: (profile as any).id,
       image_url: url,
     }));
 
@@ -80,7 +105,7 @@ const Upload = () => {
       .insert(imageInserts as any);
 
     if (imagesError) {
-      toast({ title: 'Error uploading images', description: imagesError.message, variant: 'destructive' });
+      toast({ title: 'Error saving image records', description: imagesError.message, variant: 'destructive' });
     } else {
       toast({ title: 'Profile created successfully!' });
       navigate('/');
@@ -122,19 +147,21 @@ const Upload = () => {
                 />
               </div>
 
-              <div className="space-y-4">
-                <Label>Image URLs</Label>
-                {imageUrls.map((url, index) => (
-                  <Input
-                    key={index}
-                    value={url}
-                    onChange={(e) => updateImageUrl(index, e.target.value)}
-                    placeholder="https://example.com/image.jpg"
-                  />
-                ))}
-                <Button type="button" variant="outline" onClick={addImageUrlField} className="w-full">
-                  Add Another Image
-                </Button>
+              <div className="space-y-2">
+                <Label htmlFor="images">Images</Label>
+                <Input
+                  id="images"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileChange}
+                  required
+                />
+                {imageFiles.length > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    {imageFiles.length} file(s) selected
+                  </p>
+                )}
               </div>
 
               <Button type="submit" disabled={loading} className="w-full">
