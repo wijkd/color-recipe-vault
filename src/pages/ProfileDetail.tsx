@@ -44,7 +44,7 @@ const ProfileDetail = () => {
   const fetchProfile = async () => {
     const { data, error } = await supabase
       .from('color_profiles')
-      .select('*, profiles!color_profiles_user_id_fkey(username)')
+      .select('*, profiles!color_profiles_user_id_fkey!outer(username)')
       .eq('id', id)
       .maybeSingle();
 
