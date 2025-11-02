@@ -54,7 +54,7 @@ const Upload = () => {
       .insert({
         name,
         description,
-        user_id: user.id,
+        contributor_id: user.id,
       } as any)
       .select()
       .single();
