@@ -58,7 +58,7 @@ const ProfileDetail = () => {
     const { data } = await supabase
       .from('profile_images')
       .select('*')
-      .eq('color_profile_id', id);
+      .eq('profile_id', id);
 
     if (data) setImages(data);
   };
@@ -66,18 +66,18 @@ const ProfileDetail = () => {
   const fetchComments = async () => {
     const { data } = await supabase
       .from('comments')
-      .select('*, profiles(username)')
-      .eq('color_profile_id', id)
+      .select('id, content, created_at, profiles!comments_user_id_fkey(username)')
+      .eq('profile_id', id)
       .order('created_at', { ascending: false });
 
-    if (data) setComments(data);
+    if (data) setComments(data as any);
   };
 
   const fetchUserRating = async () => {
     const { data } = await supabase
       .from('ratings')
       .select('rating')
-      .eq('color_profile_id', id)
+      .eq('profile_id', id)
       .eq('user_id', user!.id)
       .maybeSingle();
 
@@ -93,7 +93,7 @@ const ProfileDetail = () => {
     const { error } = await supabase
       .from('ratings')
       .upsert({ 
-        color_profile_id: id!, 
+        profile_id: id!, 
         user_id: user.id, 
         rating 
       } as any);
@@ -116,7 +116,7 @@ const ProfileDetail = () => {
     const { error } = await supabase
       .from('comments')
       .insert({ 
-        color_profile_id: id!, 
+        profile_id: id!, 
         user_id: user.id, 
         content: newComment 
       } as any);
@@ -174,7 +174,7 @@ const ProfileDetail = () => {
               <div className="flex items-center gap-2 mb-2">
                 <Star className="h-5 w-5 fill-primary text-primary" />
                 <span className="font-semibold">
-                  {profile.average_rating ? profile.average_rating.toFixed(1) : 'No ratings'}
+                  {profile.avg_rating ? profile.avg_rating.toFixed(1) : 'No ratings'}
                 </span>
                 <span className="text-muted-foreground">({profile.total_ratings} ratings)</span>
               </div>

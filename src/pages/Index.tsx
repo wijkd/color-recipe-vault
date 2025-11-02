@@ -8,7 +8,7 @@ import { Search } from 'lucide-react';
 interface ColorProfile {
   id: string;
   name: string;
-  average_rating: number | null;
+  avg_rating: number | null;
   total_ratings: number;
   profile_images: { image_url: string }[];
 }
@@ -28,7 +28,7 @@ const Index = () => {
       .select(`
         id,
         name,
-        average_rating,
+        avg_rating,
         total_ratings,
         profile_images (image_url)
       `)
@@ -80,7 +80,7 @@ const Index = () => {
                 id={profile.id}
                 name={profile.name}
                 imageUrl={profile.profile_images[0]?.image_url || '/placeholder.svg'}
-                averageRating={profile.average_rating}
+                averageRating={profile.avg_rating}
                 totalRatings={profile.total_ratings}
               />
             ))}
