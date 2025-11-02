@@ -44,12 +44,14 @@ const ProfileDetail = () => {
   const fetchProfile = async () => {
     const { data, error } = await supabase
       .from('color_profiles')
-      .select('*, profiles(username)')
+      .select('*, profiles!color_profiles_user_id_fkey(username)')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
-    if (!error && data) {
+    if (data) {
       setProfile(data);
+    } else if (error) {
+      toast({ title: 'Profile not found', variant: 'destructive' });
     }
     setLoading(false);
   };
