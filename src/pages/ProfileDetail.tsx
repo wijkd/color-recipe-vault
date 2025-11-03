@@ -207,7 +207,31 @@ const ProfileDetail = () => {
               )}
             </div>
 
-            <Button className="w-full" size="lg">
+            <Button 
+              className="w-full" 
+              size="lg"
+              onClick={async () => {
+                if (images.length === 0) {
+                  toast({ title: 'No image available', variant: 'destructive' });
+                  return;
+                }
+                try {
+                  const response = await fetch(images[0].image_url);
+                  const blob = await response.blob();
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `${profile.name}.jpg`;
+                  document.body.appendChild(a);
+                  a.click();
+                  window.URL.revokeObjectURL(url);
+                  document.body.removeChild(a);
+                  toast({ title: 'Download started' });
+                } catch (error) {
+                  toast({ title: 'Download failed', variant: 'destructive' });
+                }
+              }}
+            >
               <Download className="h-4 w-4 mr-2" />
               Download JPG for OM Workspace
             </Button>
