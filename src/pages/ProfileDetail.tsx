@@ -31,6 +31,7 @@ const ProfileDetail = () => {
   const [userRating, setUserRating] = useState<number>(0);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -44,14 +45,18 @@ const ProfileDetail = () => {
   const fetchProfile = async () => {
     const { data, error } = await supabase
       .from('color_profiles')
-      .select('*, profiles!inner(username)')
+      .select('*')
       .eq('id', id)
       .maybeSingle();
 
     if (data) {
       setProfile(data);
+      setErrorMessage(null);
     } else if (error) {
-      toast({ title: 'Profile not found', variant: 'destructive' });
+      setErrorMessage(error.message);
+      toast({ title: error.message, variant: 'destructive' });
+    } else {
+      setErrorMessage('Profile not found');
     }
     setLoading(false);
   };
@@ -131,7 +136,7 @@ const ProfileDetail = () => {
   };
 
   if (loading) return <div>Loading...</div>;
-  if (!profile) return <div>Profile not found</div>;
+  if (!profile) return <div>{errorMessage ?? 'Profile not found'}</div>;
 
   return (
     <div className="min-h-screen bg-background">
