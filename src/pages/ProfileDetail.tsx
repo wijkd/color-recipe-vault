@@ -45,7 +45,7 @@ const ProfileDetail = () => {
   const fetchProfile = async () => {
     const { data, error } = await supabase
       .from('color_profiles')
-      .select('*')
+      .select('*, profiles!color_profiles_user_id_fkey(username)')
       .eq('id', id)
       .maybeSingle();
 
@@ -174,7 +174,10 @@ const ProfileDetail = () => {
           </div>
 
           <div>
-            <h1 className="text-3xl font-bold mb-4">{profile.name}</h1>
+            <h1 className="text-3xl font-bold mb-2">{profile.name}</h1>
+            <p className="text-sm text-muted-foreground mb-4">
+              Uploaded by {profile.profiles?.username || 'Unknown user'}
+            </p>
             <p className="text-muted-foreground mb-4">{profile.description}</p>
             
             <div className="mb-6">
