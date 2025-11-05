@@ -48,32 +48,34 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">Discover Color Profiles</h1>
-          <p className="text-muted-foreground mb-6">
-            Browse and download color profiles for your OM System camera
+      <main className="container mx-auto px-6 py-16 max-w-7xl">
+        <div className="mb-16 text-center max-w-3xl mx-auto animate-fade-in">
+          <h1 className="text-6xl md:text-7xl font-display font-medium mb-6 tracking-tight">
+            Color Profiles
+          </h1>
+          <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+            Curated collection of professional color profiles for OM System cameras
           </p>
           
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="relative max-w-md mx-auto">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               placeholder="Search profiles..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-12 h-12 bg-card border-border text-base"
             />
           </div>
         </div>
 
         {loading ? (
-          <div className="text-center text-muted-foreground">Loading profiles...</div>
+          <div className="text-center text-muted-foreground py-20">Loading profiles...</div>
         ) : filteredProfiles.length === 0 ? (
-          <div className="text-center text-muted-foreground">
+          <div className="text-center text-muted-foreground py-20">
             {searchQuery ? 'No profiles found matching your search' : 'No profiles available yet'}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in">
             {filteredProfiles.map((profile) => (
               <ColorProfileCard
                 key={profile.id}

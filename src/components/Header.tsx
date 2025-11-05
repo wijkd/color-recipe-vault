@@ -9,33 +9,33 @@ const Header = () => {
   const { isContributor } = useUserRole();
 
   return (
-    <header className="border-b bg-card">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 text-xl font-bold">
-          <Camera className="h-6 w-6 text-primary" />
-          <span>OM Color Profiles</span>
+    <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
+      <div className="container mx-auto px-6 py-5 flex items-center justify-between max-w-7xl">
+        <Link to="/" className="flex items-center gap-3 group">
+          <Camera className="h-5 w-5 text-foreground transition-transform group-hover:scale-110" />
+          <span className="font-display text-xl tracking-tight">OM Color Profiles</span>
         </Link>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {user ? (
             <>
               {isContributor && (
                 <Link to="/upload">
-                  <Button variant="outline" size="sm">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload Profile
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <Upload className="h-4 w-4" />
+                    <span className="hidden sm:inline">Upload</span>
                   </Button>
                 </Link>
               )}
-              <Button variant="ghost" size="sm" onClick={() => signOut()}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
+              <Button variant="ghost" size="sm" onClick={() => signOut()} className="gap-2">
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Sign Out</span>
               </Button>
             </>
           ) : (
             <Link to="/auth">
-              <Button size="sm">
-                <LogIn className="h-4 w-4 mr-2" />
+              <Button size="sm" className="gap-2 bg-foreground text-background hover:bg-foreground/90">
+                <LogIn className="h-4 w-4" />
                 Sign In
               </Button>
             </Link>

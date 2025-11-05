@@ -142,77 +142,83 @@ const ProfileDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-6 py-12 max-w-6xl">
         <Link to="/">
-          <Button variant="ghost" className="mb-6">
+          <Button variant="ghost" className="mb-8 -ml-2 hover:bg-transparent">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Gallery
           </Button>
         </Link>
 
-        <div className="grid lg:grid-cols-2 gap-8 mb-8">
-          <div>
+        <div className="grid lg:grid-cols-2 gap-12 mb-16">
+          <div className="space-y-4">
             {images.length > 0 && (
-              <img 
-                src={images[0].image_url} 
-                alt={profile.name}
-                className="w-full rounded-lg"
-              />
+              <div className="aspect-[3/4] overflow-hidden bg-muted">
+                <img 
+                  src={images[0].image_url} 
+                  alt={profile.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
             )}
             {images.length > 1 && (
-              <div className="grid grid-cols-3 gap-2 mt-2">
+              <div className="grid grid-cols-4 gap-4">
                 {images.slice(1).map(img => (
-                  <img 
-                    key={img.id}
-                    src={img.image_url}
-                    alt=""
-                    className="w-full aspect-square object-cover rounded"
-                  />
+                  <div key={img.id} className="aspect-square overflow-hidden bg-muted">
+                    <img 
+                      src={img.image_url}
+                      alt=""
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300 cursor-pointer"
+                    />
+                  </div>
                 ))}
               </div>
             )}
           </div>
 
-          <div>
-            <h1 className="text-3xl font-bold mb-2">{profile.name}</h1>
-            <p className="text-sm text-muted-foreground mb-4">
-              Uploaded by {profile.profiles?.username || 'Unknown user'}
-            </p>
-            <p className="text-muted-foreground mb-4">{profile.description}</p>
-            
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-2">
-                <Star className="h-5 w-5 fill-primary text-primary" />
-                <span className="font-semibold">
-                  {profile.avg_rating ? profile.avg_rating.toFixed(1) : 'No ratings'}
-                </span>
-                <span className="text-muted-foreground">({profile.total_ratings} ratings)</span>
-              </div>
+          <div className="flex flex-col justify-between">
+            <div>
+              <h1 className="text-5xl font-display font-medium mb-4 tracking-tight">{profile.name}</h1>
+              <p className="text-sm text-muted-foreground mb-6 uppercase tracking-wider">
+                by {profile.profiles?.username || 'Unknown user'}
+              </p>
+              <p className="text-lg text-foreground/80 mb-8 leading-relaxed">{profile.description}</p>
               
-              {user && (
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map(star => (
-                    <button
-                      key={star}
-                      onClick={() => handleRating(star)}
-                      className="hover:scale-110 transition-transform"
-                    >
-                      <Star
-                        className={`h-6 w-6 ${
-                          star <= userRating
-                            ? 'fill-primary text-primary'
-                            : 'text-muted-foreground'
-                        }`}
-                      />
-                    </button>
-                  ))}
+              <div className="mb-8 pb-8 border-b border-border">
+                <div className="flex items-center gap-3 mb-4">
+                  <Star className="h-6 w-6 fill-foreground text-foreground" />
+                  <span className="text-2xl font-display">
+                    {profile.avg_rating ? profile.avg_rating.toFixed(1) : 'New'}
+                  </span>
+                  {profile.total_ratings > 0 && (
+                    <span className="text-muted-foreground">({profile.total_ratings} {profile.total_ratings === 1 ? 'rating' : 'ratings'})</span>
+                  )}
                 </div>
-              )}
+                
+                {user && (
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <button
+                        key={star}
+                        onClick={() => handleRating(star)}
+                        className="hover:scale-125 transition-transform duration-200"
+                      >
+                        <Star
+                          className={`h-7 w-7 ${
+                            star <= userRating
+                              ? 'fill-foreground text-foreground'
+                              : 'text-border hover:text-foreground/40'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <Button 
-              className="w-full" 
-              size="lg"
+              className="w-full h-14 text-base bg-foreground text-background hover:bg-foreground/90 transition-colors"
               onClick={async () => {
                 if (images.length === 0) {
                   toast({ title: 'No image available', variant: 'destructive' });
@@ -235,36 +241,47 @@ const ProfileDetail = () => {
                 }
               }}
             >
-              <Download className="h-4 w-4 mr-2" />
-              Download JPG for OM Workspace
+              <Download className="h-5 w-5 mr-2" />
+              Download for OM Workspace
             </Button>
           </div>
         </div>
 
-        <Card>
-          <CardContent className="p-6">
-            <h2 className="text-xl font-bold mb-4">Comments</h2>
+        <Card className="border-0 shadow-sm bg-card">
+          <CardContent className="p-8">
+            <h2 className="text-3xl font-display font-medium mb-8 tracking-tight">Comments</h2>
             
             {user && (
-              <div className="mb-6">
+              <div className="mb-10 pb-10 border-b border-border">
                 <Textarea
                   placeholder="Share your thoughts..."
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  className="mb-2"
+                  className="mb-4 min-h-[120px] resize-none bg-background border-border"
                 />
-                <Button onClick={handleComment}>Post Comment</Button>
+                <Button 
+                  onClick={handleComment}
+                  className="bg-foreground text-background hover:bg-foreground/90"
+                >
+                  Post Comment
+                </Button>
               </div>
             )}
 
-            <div className="space-y-4">
+            <div className="space-y-8">
               {comments.map(comment => (
-                <div key={comment.id} className="border-b pb-4">
-                  <div className="font-semibold">{comment.profiles.username}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {new Date(comment.created_at).toLocaleDateString()}
+                <div key={comment.id} className="pb-8 border-b border-border last:border-0 last:pb-0">
+                  <div className="flex items-baseline gap-3 mb-3">
+                    <div className="font-medium text-foreground">{comment.profiles.username}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {new Date(comment.created_at).toLocaleDateString('en-US', { 
+                        month: 'long', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                      })}
+                    </div>
                   </div>
-                  <p className="mt-2">{comment.content}</p>
+                  <p className="text-foreground/80 leading-relaxed">{comment.content}</p>
                 </div>
               ))}
             </div>
