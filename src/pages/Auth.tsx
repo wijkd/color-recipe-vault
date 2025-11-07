@@ -12,6 +12,9 @@ import { Camera } from 'lucide-react';
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [instagramUrl, setInstagramUrl] = useState('');
+  const [websiteUrl, setWebsiteUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const { toast } = useToast();
@@ -49,7 +52,11 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await signUp(email, password);
+    const { error } = await signUp(email, password, {
+      username: username || email.split('@')[0],
+      instagram_url: instagramUrl,
+      website_url: websiteUrl
+    });
     
     if (error) {
       toast({
@@ -126,6 +133,16 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="signup-username">Username</Label>
+                  <Input
+                    id="signup-username"
+                    type="text"
+                    placeholder="Your display name"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
                   <Input
                     id="signup-password"
@@ -135,6 +152,26 @@ const Auth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={6}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-instagram">Instagram URL (optional)</Label>
+                  <Input
+                    id="signup-instagram"
+                    type="url"
+                    placeholder="https://instagram.com/yourprofile"
+                    value={instagramUrl}
+                    onChange={(e) => setInstagramUrl(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-website">Website URL (optional)</Label>
+                  <Input
+                    id="signup-website"
+                    type="url"
+                    placeholder="https://yourwebsite.com"
+                    value={websiteUrl}
+                    onChange={(e) => setWebsiteUrl(e.target.value)}
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
