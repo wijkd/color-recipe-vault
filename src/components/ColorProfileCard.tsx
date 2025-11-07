@@ -17,7 +17,7 @@ const ColorProfileCard = ({ id, name, imageUrl, averageRating, totalRatings, use
     <Link to={`/profile/${id}`} className="group">
       <Card className="overflow-hidden border-0 shadow-sm hover:shadow-xl transition-all duration-500 bg-card">
         <div className="flex gap-4 p-4">
-          <div className="w-32 h-32 flex-shrink-0 overflow-hidden bg-muted rounded-md">
+          <div className="w-40 h-40 flex-shrink-0 overflow-hidden bg-muted rounded-md">
             <img 
               src={imageUrl} 
               alt={name}
