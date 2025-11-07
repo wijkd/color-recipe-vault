@@ -8,6 +8,7 @@ import { Search } from 'lucide-react';
 interface ColorProfile {
   id: string;
   name: string;
+  description: string | null;
   avg_rating: number | null;
   total_ratings: number;
   profile_images: { image_url: string }[];
@@ -28,6 +29,7 @@ const Index = () => {
       .select(`
         id,
         name,
+        description,
         avg_rating,
         total_ratings,
         profile_images (image_url)
@@ -41,7 +43,8 @@ const Index = () => {
   };
 
   const filteredProfiles = profiles.filter(profile =>
-    profile.name.toLowerCase().includes(searchQuery.toLowerCase())
+    profile.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    profile.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
