@@ -12,6 +12,7 @@ interface ColorProfile {
   avg_rating: number | null;
   total_ratings: number;
   profile_images: { image_url: string }[];
+  profiles: { username: string } | null;
 }
 
 const Index = () => {
@@ -32,7 +33,8 @@ const Index = () => {
         description,
         avg_rating,
         total_ratings,
-        profile_images (image_url)
+        profile_images (image_url),
+        profiles!color_profiles_user_id_fkey (username)
       `)
       .order('created_at', { ascending: false });
 
@@ -87,6 +89,8 @@ const Index = () => {
                 imageUrl={profile.profile_images[0]?.image_url || '/placeholder.svg'}
                 averageRating={profile.avg_rating}
                 totalRatings={profile.total_ratings}
+                username={profile.profiles?.username || 'Unknown'}
+                description={profile.description}
               />
             ))}
           </div>
