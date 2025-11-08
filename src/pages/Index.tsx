@@ -11,6 +11,11 @@ interface ColorProfile {
   description: string | null;
   avg_rating: number | null;
   total_ratings: number;
+  category: string | null;
+  camera_model: string | null;
+  view_count: number;
+  download_count: number;
+  featured: boolean;
   profile_images: { image_url: string }[];
   profiles: { username: string } | null;
 }
@@ -33,6 +38,11 @@ const Index = () => {
         description,
         avg_rating,
         total_ratings,
+        category,
+        camera_model,
+        view_count,
+        download_count,
+        featured,
         profile_images (image_url),
         profiles!color_profiles_user_id_fkey (username)
       `)
@@ -91,6 +101,11 @@ const Index = () => {
                 totalRatings={profile.total_ratings}
                 username={profile.profiles?.username || 'Unknown'}
                 description={profile.description}
+                category={profile.category}
+                cameraModel={profile.camera_model}
+                viewCount={profile.view_count}
+                downloadCount={profile.download_count}
+                featured={profile.featured}
               />
             ))}
           </div>
