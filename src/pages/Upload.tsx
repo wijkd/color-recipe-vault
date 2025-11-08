@@ -374,22 +374,32 @@ const Upload = () => {
     const { user, loading: authLoading } = useAuth();
     const { isContributor, loading: roleLoading } = useUserRole();
 
-    const isLoading = authLoading || roleLoading;
+    if (authLoading || roleLoading) {
+      return (
+        <div className="min-h-screen bg-background">
+          <Header />
+          <div className="container mx-auto px-4 py-8 text-center">
+            <p>Loading...</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (!user || !isContributor) {
+      return (
+        <div className="min-h-screen bg-background">
+          <Header />
+          <div className="container mx-auto px-4 py-8 text-center">
+            <p className="text-muted-foreground">You need contributor access to upload profiles.</p>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        {isLoading ? (
-          <div className="container mx-auto px-4 py-8 text-center">
-            <p>Loading...</p>
-          </div>
-        ) : !user || !isContributor ? (
-          <div className="container mx-auto px-4 py-8 text-center">
-            <p className="text-muted-foreground">You need contributor access to upload profiles.</p>
-          </div>
-        ) : (
-          <UploadForm user={user} />
-        )}
+        <UploadForm user={user} />
       </div>
     );
   };
