@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import ProfileDetail from "./pages/ProfileDetail";
 import Upload from "./pages/Upload";
 import NotFound from "./pages/NotFound";
+import ContributorRoute from "./components/auth/ContributorRoute";
 
 const queryClient = new QueryClient();
 
@@ -23,7 +24,11 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/profile/:id" element={<ProfileDetail />} />
-            <Route path="/upload" element={<Upload />} />
+            <Route path="/upload" element={
+              <ContributorRoute>
+                <Upload />
+              </ContributorRoute>
+            } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
