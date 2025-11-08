@@ -14,38 +14,106 @@ export type Database = {
   }
   public: {
     Tables: {
-      color_profiles: {
+      bookmarks: {
         Row: {
-          avg_rating: number | null
           created_at: string
-          description: string | null
           id: string
-          name: string
-          total_ratings: number | null
-          updated_at: string
+          profile_id: string
           user_id: string
         }
         Insert: {
-          avg_rating?: number | null
           created_at?: string
-          description?: string | null
           id?: string
-          name: string
-          total_ratings?: number | null
-          updated_at?: string
+          profile_id: string
           user_id: string
         }
         Update: {
+          created_at?: string
+          id?: string
+          profile_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "color_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookmarks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      color_profiles: {
+        Row: {
+          avg_rating: number | null
+          camera_model: string | null
+          category: string | null
+          created_at: string
+          description: string | null
+          download_count: number
+          featured: boolean
+          id: string
+          lens_model: string | null
+          lighting_conditions: string | null
+          name: string
+          tags: string[] | null
+          total_ratings: number | null
+          updated_at: string
+          user_id: string
+          view_count: number
+        }
+        Insert: {
           avg_rating?: number | null
+          camera_model?: string | null
+          category?: string | null
           created_at?: string
           description?: string | null
+          download_count?: number
+          featured?: boolean
           id?: string
+          lens_model?: string | null
+          lighting_conditions?: string | null
+          name: string
+          tags?: string[] | null
+          total_ratings?: number | null
+          updated_at?: string
+          user_id: string
+          view_count?: number
+        }
+        Update: {
+          avg_rating?: number | null
+          camera_model?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          download_count?: number
+          featured?: boolean
+          id?: string
+          lens_model?: string | null
+          lighting_conditions?: string | null
           name?: string
+          tags?: string[] | null
           total_ratings?: number | null
           updated_at?: string
           user_id?: string
+          view_count?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "color_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       comments: {
         Row: {
@@ -75,6 +143,13 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "color_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -113,22 +188,28 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           id: string
+          instagram_url: string | null
           updated_at: string
           username: string | null
+          website_url: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           id: string
+          instagram_url?: string | null
           updated_at?: string
           username?: string | null
+          website_url?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
           id?: string
+          instagram_url?: string | null
           updated_at?: string
           username?: string | null
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -160,6 +241,13 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "color_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
