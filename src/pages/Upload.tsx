@@ -165,13 +165,13 @@ const Upload = () => {
 
     // Insert image records
     const imageInserts = uploadedUrls.map(url => ({
-      profile_id: (profile as any).id,
+      profile_id: profile.id,
       image_url: url,
     }));
 
     const { error: imagesError } = await supabase
       .from('profile_images')
-      .insert(imageInserts as any);
+      .insert(imageInserts);
 
     if (imagesError) {
       toast({ title: 'Error saving image records', description: imagesError.message, variant: 'destructive' });
