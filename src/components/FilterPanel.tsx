@@ -206,39 +206,29 @@ const FilterContent = ({
 
 export const FilterPanel = (props: FilterPanelProps) => {
   return (
-    <>
-      {/* Desktop: Inline Filters */}
-      <div className="hidden lg:block">
-        <FilterContent {...props} />
-      </div>
-
-      {/* Mobile: Sheet Drawer */}
-      <div className="lg:hidden">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="outline" className="gap-2 relative">
-              <Filter className="h-4 w-4" />
-              Filters
-              {props.activeFilterCount > 0 && (
-                <Badge 
-                  variant="destructive" 
-                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-                >
-                  {props.activeFilterCount}
-                </Badge>
-              )}
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>Filter Profiles</SheetTitle>
-            </SheetHeader>
-            <div className="mt-6">
-              <FilterContent {...props} />
-            </div>
-          </SheetContent>
-        </Sheet>
-      </div>
-    </>
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="outline" className="gap-2 relative h-12 px-6">
+          <Filter className="h-4 w-4" />
+          Filters
+          {props.activeFilterCount > 0 && (
+            <Badge 
+              variant="destructive" 
+              className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+            >
+              {props.activeFilterCount}
+            </Badge>
+          )}
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>Filter Profiles</SheetTitle>
+        </SheetHeader>
+        <div className="mt-6">
+          <FilterContent {...props} />
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };

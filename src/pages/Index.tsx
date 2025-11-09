@@ -167,6 +167,13 @@ const Index = () => {
           </div>
         </div>
 
+        {/* Result Count */}
+        <div className="mb-4">
+          <p className="text-sm text-muted-foreground">
+            Showing <span className="font-medium text-foreground">{filteredProfiles.length}</span> {filteredProfiles.length === 1 ? 'profile' : 'profiles'}
+          </p>
+        </div>
+
         {/* Active Filters Display */}
         {(activeFilterCount > 0 || searchQuery) && (
           <div className="mb-8 animate-fade-in">
@@ -234,58 +241,33 @@ const Index = () => {
           </div>
         )}
 
-        {/* Desktop: Sidebar Layout */}
-        <div className="lg:grid lg:grid-cols-[280px,1fr] lg:gap-8">
-          {/* Filters Sidebar - Desktop Only */}
-          <aside className="hidden lg:block">
-            <div className="sticky top-24 bg-card border border-border rounded-lg p-6">
-              <FilterPanel
-                filters={filters}
-                onFiltersChange={setFilters}
-                onClearFilters={clearFilters}
-                activeFilterCount={activeFilterCount}
-              />
-            </div>
-          </aside>
-
-          {/* Results */}
-          <div>
-            {/* Result Count */}
-            <div className="mb-6">
-              <p className="text-sm text-muted-foreground">
-                Showing <span className="font-medium text-foreground">{filteredProfiles.length}</span> {filteredProfiles.length === 1 ? 'profile' : 'profiles'}
-              </p>
-            </div>
-
-            {loading ? (
-              <div className="text-center text-muted-foreground py-20">Loading profiles...</div>
-            ) : filteredProfiles.length === 0 ? (
-              <div className="text-center text-muted-foreground py-20">
-                {searchQuery || activeFilterCount > 0 ? 'No profiles found matching your filters' : 'No profiles available yet'}
-              </div>
-            ) : (
-              <div className="grid gap-6 animate-fade-in">
-                {filteredProfiles.map((profile) => (
-                  <ColorProfileCard
-                    key={profile.id}
-                    id={profile.id}
-                    name={profile.name}
-                    imageUrl={profile.profile_images[0]?.image_url || '/placeholder.svg'}
-                    averageRating={profile.avg_rating}
-                    totalRatings={profile.total_ratings}
-                    username={profile.profiles?.username || 'Unknown'}
-                    description={profile.description}
-                    category={profile.category}
-                    cameraModel={profile.camera_model}
-                    viewCount={profile.view_count}
-                    downloadCount={profile.download_count}
-                    featured={profile.featured}
-                  />
-                ))}
-              </div>
-            )}
+        {loading ? (
+          <div className="text-center text-muted-foreground py-20">Loading profiles...</div>
+        ) : filteredProfiles.length === 0 ? (
+          <div className="text-center text-muted-foreground py-20">
+            {searchQuery || activeFilterCount > 0 ? 'No profiles found matching your filters' : 'No profiles available yet'}
           </div>
-        </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in">
+            {filteredProfiles.map((profile) => (
+              <ColorProfileCard
+                key={profile.id}
+                id={profile.id}
+                name={profile.name}
+                imageUrl={profile.profile_images[0]?.image_url || '/placeholder.svg'}
+                averageRating={profile.avg_rating}
+                totalRatings={profile.total_ratings}
+                username={profile.profiles?.username || 'Unknown'}
+                description={profile.description}
+                category={profile.category}
+                cameraModel={profile.camera_model}
+                viewCount={profile.view_count}
+                downloadCount={profile.download_count}
+                featured={profile.featured}
+              />
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
