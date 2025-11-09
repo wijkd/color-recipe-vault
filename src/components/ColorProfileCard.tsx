@@ -85,9 +85,9 @@ const ColorProfileCard = ({
   };
 
   return (
-    <Link to={`/profile/${id}`} className="group block">
-      <Card className="overflow-hidden border-0 shadow-sm hover:shadow-xl transition-all duration-500 bg-card relative">
-        <div className="flex gap-4 p-4">
+    <Link to={`/profile/${id}`} className="group block h-full">
+      <Card className="overflow-hidden border-0 shadow-sm hover:shadow-xl transition-all duration-500 bg-card relative h-full">
+        <div className="flex gap-4 p-4 h-full">
           {/* Image with overlay */}
           <div className="w-40 h-40 flex-shrink-0 overflow-hidden bg-muted rounded-md relative">
             {!imageLoaded && (
