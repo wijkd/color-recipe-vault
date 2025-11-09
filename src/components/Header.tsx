@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Camera, Upload, LogOut, LogIn } from 'lucide-react';
+import { Camera, Upload, LogOut, LogIn, Bookmark } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -19,6 +19,12 @@ const Header = () => {
         <div className="flex items-center gap-3">
           {user ? (
             <>
+              <Link to="/bookmarks">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <Bookmark className="h-4 w-4" />
+                  <span className="hidden sm:inline">Bookmarks</span>
+                </Button>
+              </Link>
               {isContributor && (
                 <Link to="/upload">
                   <Button variant="ghost" size="sm" className="gap-2">

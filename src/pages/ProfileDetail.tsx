@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useBookmarks } from '@/hooks/useBookmarks';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Star, Download, ArrowLeft } from 'lucide-react';
+import { Star, Download, ArrowLeft, Bookmark } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProfileImage {
@@ -25,6 +26,7 @@ const ProfileDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isBookmarked, toggleBookmark } = useBookmarks();
   const [profile, setProfile] = useState<any>(null);
   const [images, setImages] = useState<ProfileImage[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -217,9 +219,19 @@ const ProfileDetail = () => {
               </div>
             </div>
 
-            <Button 
-              className="w-full h-14 text-base bg-foreground text-background hover:bg-foreground/90 transition-colors"
-              onClick={async () => {
+            <div className="flex gap-3">
+              <Button 
+                variant="outline"
+                size="icon"
+                className="h-14 w-14 flex-shrink-0"
+                onClick={() => toggleBookmark(id!)}
+              >
+                <Bookmark className={`h-5 w-5 ${isBookmarked(id!) ? 'fill-foreground' : ''}`} />
+              </Button>
+              
+              <Button 
+                className="flex-1 h-14 text-base bg-foreground text-background hover:bg-foreground/90 transition-colors"
+                onClick={async () => {
                 if (images.length === 0) {
                   toast({ title: 'No image available', variant: 'destructive' });
                   return;
@@ -240,10 +252,11 @@ const ProfileDetail = () => {
                   toast({ title: 'Download failed', variant: 'destructive' });
                 }
               }}
-            >
-              <Download className="h-5 w-5 mr-2" />
-              Download for OM Workspace
-            </Button>
+              >
+                <Download className="h-5 w-5 mr-2" />
+                Download for OM Workspace
+              </Button>
+            </div>
           </div>
         </div>
 

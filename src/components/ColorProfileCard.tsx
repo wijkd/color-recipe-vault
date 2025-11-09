@@ -4,9 +4,7 @@ import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Skeleton } from './ui/skeleton';
 import { Star, Camera, Eye, Download, Bookmark } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useBookmarks } from '@/hooks/useBookmarks';
 
 interface ColorProfileCardProps {
   id: string;
@@ -48,40 +46,12 @@ const ColorProfileCard = ({
   featured
 }: ColorProfileCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const { isBookmarked, toggleBookmark } = useBookmarks();
 
   const handleBookmark = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    if (!user) {
-      toast({ title: 'Please sign in to bookmark profiles', variant: 'destructive' });
-      return;
-    }
-
-    if (isBookmarked) {
-      const { error } = await supabase
-        .from('bookmarks')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('profile_id', id);
-      
-      if (!error) {
-        setIsBookmarked(false);
-        toast({ title: 'Removed from bookmarks' });
-      }
-    } else {
-      const { error } = await supabase
-        .from('bookmarks')
-        .insert({ user_id: user.id, profile_id: id });
-      
-      if (!error) {
-        setIsBookmarked(true);
-        toast({ title: 'Added to bookmarks' });
-      }
-    }
+    await toggleBookmark(id);
   };
 
   return (
@@ -111,7 +81,7 @@ const ColorProfileCard = ({
                 className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 transition-colors"
               >
                 <Bookmark 
-                  className={`h-4 w-4 ${isBookmarked ? 'fill-white' : ''}`}
+                  className={`h-4 w-4 ${isBookmarked(id) ? 'fill-white' : ''}`}
                 />
               </button>
             </div>
