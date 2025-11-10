@@ -21,6 +21,7 @@ interface ColorProfile {
   featured: boolean;
   tags: string[] | null;
   lighting_conditions: string | null;
+  user_id: string;
   profile_images: { image_url: string }[];
   profiles: { username: string } | null;
 }
@@ -57,6 +58,7 @@ const Index = () => {
         featured,
         tags,
         lighting_conditions,
+        user_id,
         profile_images (image_url),
         profiles!color_profiles_user_id_fkey (username)
       `)
@@ -258,6 +260,7 @@ const Index = () => {
                 averageRating={profile.avg_rating}
                 totalRatings={profile.total_ratings}
                 username={profile.profiles?.username || 'Unknown'}
+                userId={profile.user_id}
                 description={profile.description}
                 category={profile.category}
                 cameraModel={profile.camera_model}

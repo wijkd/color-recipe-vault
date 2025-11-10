@@ -13,6 +13,7 @@ interface ColorProfileCardProps {
   averageRating: number | null;
   totalRatings: number;
   username: string;
+  userId?: string;
   description: string | null;
   category: string | null;
   cameraModel: string | null;
@@ -37,7 +38,8 @@ const ColorProfileCard = ({
   imageUrl, 
   averageRating, 
   totalRatings, 
-  username, 
+  username,
+  userId,
   description,
   category,
   cameraModel,
@@ -109,7 +111,20 @@ const ColorProfileCard = ({
           {/* Content */}
           <div className="flex-1 min-w-0 flex flex-col">
             <h3 className="font-display text-xl mb-1 truncate">{name}</h3>
-            <p className="text-sm text-muted-foreground mb-2">by {username}</p>
+            <p className="text-sm text-muted-foreground mb-2">
+              by{' '}
+              {userId ? (
+                <Link 
+                  to={`/user/${userId}`} 
+                  className="hover:text-foreground transition-colors hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {username}
+                </Link>
+              ) : (
+                username
+              )}
+            </p>
             
             {/* Camera model */}
             {cameraModel && (

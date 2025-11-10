@@ -194,7 +194,17 @@ const ProfileDetail = () => {
             <div>
               <h1 className="text-5xl font-display font-medium mb-4 tracking-tight">{profile.name}</h1>
               <p className="text-sm text-muted-foreground mb-6 uppercase tracking-wider">
-                by {profile.profiles?.username || 'Unknown user'}
+                by{' '}
+                {profile.user_id ? (
+                  <Link 
+                    to={`/user/${profile.user_id}`}
+                    className="hover:text-foreground transition-colors hover:underline"
+                  >
+                    {profile.profiles?.username || 'Unknown user'}
+                  </Link>
+                ) : (
+                  profile.profiles?.username || 'Unknown user'
+                )}
               </p>
               <p className="text-lg text-foreground/80 mb-8 leading-relaxed">{profile.description}</p>
               

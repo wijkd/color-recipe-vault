@@ -19,6 +19,7 @@ interface ColorProfile {
   view_count: number;
   download_count: number;
   featured: boolean;
+  user_id: string;
   profile_images: { image_url: string }[];
   profiles: { username: string };
 }
@@ -57,6 +58,7 @@ const Bookmarks = () => {
         view_count,
         download_count,
         featured,
+        user_id,
         profile_images(image_url),
         profiles!color_profiles_user_id_fkey(username)
       `)
@@ -129,6 +131,7 @@ const Bookmarks = () => {
                 averageRating={profile.avg_rating}
                 totalRatings={profile.total_ratings}
                 username={profile.profiles?.username || 'Unknown'}
+                userId={profile.user_id}
                 description={profile.description}
                 category={profile.category}
                 cameraModel={profile.camera_model}
