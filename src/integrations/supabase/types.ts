@@ -285,6 +285,11 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_download_count: {
+        Args: { profile_id: string }
+        Returns: undefined
+      }
+      increment_view_count: { Args: { profile_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "contributor" | "consumer"

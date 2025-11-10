@@ -7,7 +7,7 @@ import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Star, Download, ArrowLeft, Bookmark } from 'lucide-react';
+import { Star, Download, ArrowLeft, Bookmark, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProfileImage {
@@ -41,8 +41,20 @@ const ProfileDetail = () => {
       fetchImages();
       fetchComments();
       if (user) fetchUserRating();
+      incrementViewCount();
     }
   }, [id, user]);
+
+  const incrementViewCount = async () => {
+    // Only increment if not already viewed in this session
+    const viewedKey = `viewed_${id}`;
+    if (!sessionStorage.getItem(viewedKey)) {
+      const { error } = await supabase.rpc('increment_view_count', { profile_id: id });
+      if (!error) {
+        sessionStorage.setItem(viewedKey, 'true');
+      }
+    }
+  };
 
   const fetchProfile = async () => {
     const { data, error } = await supabase
@@ -186,6 +198,19 @@ const ProfileDetail = () => {
               </p>
               <p className="text-lg text-foreground/80 mb-8 leading-relaxed">{profile.description}</p>
               
+              {/* View and Download Stats */}
+              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-8">
+                <div className="flex items-center gap-1.5">
+                  <Eye className="h-4 w-4" />
+                  <span>Viewed {profile.view_count.toLocaleString()} {profile.view_count === 1 ? 'time' : 'times'}</span>
+                </div>
+                <span>•</span>
+                <div className="flex items-center gap-1.5">
+                  <Download className="h-4 w-4" />
+                  <span>Downloaded {profile.download_count.toLocaleString()} {profile.download_count === 1 ? 'time' : 'times'}</span>
+                </div>
+              </div>
+              
               <div className="mb-8 pb-8 border-b border-border">
                 <div className="flex items-center gap-3 mb-4">
                   <Star className="h-6 w-6 fill-foreground text-foreground" />
@@ -237,6 +262,9 @@ const ProfileDetail = () => {
                   return;
                 }
                 try {
+                  // Increment download count
+                  await supabase.rpc('increment_download_count', { profile_id: id });
+                  
                   const response = await fetch(images[0].image_url);
                   const blob = await response.blob();
                   const url = window.URL.createObjectURL(blob);
@@ -248,6 +276,9 @@ const ProfileDetail = () => {
                   window.URL.revokeObjectURL(url);
                   document.body.removeChild(a);
                   toast({ title: 'Download started' });
+                  
+                  // Refresh profile to show updated download count
+                  fetchProfile();
                 } catch (error) {
                   toast({ title: 'Download failed', variant: 'destructive' });
                 }
