@@ -58,10 +58,12 @@ const UserProfile = () => {
   }, [userId]);
 
   useEffect(() => {
-    if (userId && bookmarkedIds.size > 0) {
+    // Only fetch bookmarks if viewing own profile
+    const isOwnProfile = user?.id === userId;
+    if (userId && isOwnProfile && bookmarkedIds.size > 0) {
       fetchBookmarkedProfiles();
     }
-  }, [userId, bookmarkedIds]);
+  }, [userId, user?.id, bookmarkedIds]);
 
   const fetchUserProfile = async () => {
     const { data, error } = await supabase
