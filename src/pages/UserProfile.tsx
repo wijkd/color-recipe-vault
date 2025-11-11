@@ -9,7 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Instagram, Globe, Calendar, Image, Download, Star } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Instagram, Globe, Calendar, Image, Download, Star, Edit } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface UserProfile {
   id: string;
@@ -40,10 +44,17 @@ const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
   const { user } = useAuth();
   const { bookmarkedIds } = useBookmarks();
+  const { toast } = useToast();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [userProfiles, setUserProfiles] = useState<ColorProfile[]>([]);
   const [bookmarkedProfiles, setBookmarkedProfiles] = useState<ColorProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    username: '',
+    instagram_url: '',
+    website_url: ''
+  });
   const [stats, setStats] = useState({
     totalProfiles: 0,
     totalDownloads: 0,
@@ -74,8 +85,41 @@ const UserProfile = () => {
 
     if (data && !error) {
       setProfile(data);
+      setEditForm({
+        username: data.username || '',
+        instagram_url: data.instagram_url || '',
+        website_url: data.website_url || ''
+      });
     }
     setLoading(false);
+  };
+
+  const handleUpdateProfile = async () => {
+    if (!userId) return;
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        username: editForm.username || null,
+        instagram_url: editForm.instagram_url || null,
+        website_url: editForm.website_url || null
+      })
+      .eq('id', userId);
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update profile',
+        variant: 'destructive'
+      });
+    } else {
+      toast({
+        title: 'Success',
+        description: 'Profile updated successfully'
+      });
+      setDialogOpen(false);
+      fetchUserProfile();
+    }
   };
 
   const fetchUserColorProfiles = async () => {
@@ -167,9 +211,60 @@ const UserProfile = () => {
 
               {/* User Info */}
               <div className="flex-1">
-                <h1 className="text-4xl font-display font-bold mb-2">
-                  {profile.username || 'Anonymous User'}
-                </h1>
+                <div className="flex items-center justify-between mb-2">
+                  <h1 className="text-4xl font-display font-bold">
+                    {profile.username || 'Anonymous User'}
+                  </h1>
+                  {isOwnProfile && (
+                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Profile
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Edit Profile</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="username">Username</Label>
+                            <Input
+                              id="username"
+                              value={editForm.username}
+                              onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
+                              placeholder="Your username"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="instagram">Instagram URL</Label>
+                            <Input
+                              id="instagram"
+                              type="url"
+                              value={editForm.instagram_url}
+                              onChange={(e) => setEditForm({ ...editForm, instagram_url: e.target.value })}
+                              placeholder="https://instagram.com/username"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="website">Website URL</Label>
+                            <Input
+                              id="website"
+                              type="url"
+                              value={editForm.website_url}
+                              onChange={(e) => setEditForm({ ...editForm, website_url: e.target.value })}
+                              placeholder="https://yourwebsite.com"
+                            />
+                          </div>
+                          <Button onClick={handleUpdateProfile} className="w-full">
+                            Save Changes
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
                 
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
                   <div className="flex items-center gap-1.5">
