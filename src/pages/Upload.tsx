@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,8 +12,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { X, Upload as UploadIcon, Image as ImageIcon } from 'lucide-react';
+import { X, Upload as UploadIcon, Image as ImageIcon, Plus } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 
 const UploadForm = ({ user }: { user: User }) => {
     const navigate = useNavigate();
@@ -30,6 +33,77 @@ const UploadForm = ({ user }: { user: User }) => {
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [dragActive, setDragActive] = useState(false);
+    
+    // Camera/Lens model management
+    const [cameraModels, setCameraModels] = useState<string[]>([]);
+    const [lensModels, setLensModels] = useState<string[]>([]);
+    const [cameraOpen, setCameraOpen] = useState(false);
+    const [lensOpen, setLensOpen] = useState(false);
+    const [newCameraDialog, setNewCameraDialog] = useState(false);
+    const [newLensDialog, setNewLensDialog] = useState(false);
+    const [newCameraInput, setNewCameraInput] = useState('');
+    const [newLensInput, setNewLensInput] = useState('');
+
+    useEffect(() => {
+      fetchCameraModels();
+      fetchLensModels();
+    }, []);
+
+    const fetchCameraModels = async () => {
+      const { data } = await supabase
+        .from('camera_models')
+        .select('name')
+        .order('name');
+      if (data) {
+        setCameraModels(data.map(m => m.name));
+      }
+    };
+
+    const fetchLensModels = async () => {
+      const { data } = await supabase
+        .from('lens_models')
+        .select('name')
+        .order('name');
+      if (data) {
+        setLensModels(data.map(m => m.name));
+      }
+    };
+
+    const handleAddNewCamera = async () => {
+      if (!newCameraInput.trim()) return;
+      
+      const { error } = await supabase
+        .from('camera_models')
+        .insert({ name: newCameraInput.trim(), created_by: user.id });
+      
+      if (error) {
+        toast({ title: 'Error adding camera model', description: error.message, variant: 'destructive' });
+      } else {
+        setCameraModel(newCameraInput.trim());
+        await fetchCameraModels();
+        setNewCameraDialog(false);
+        setNewCameraInput('');
+        toast({ title: 'Camera model added successfully!' });
+      }
+    };
+
+    const handleAddNewLens = async () => {
+      if (!newLensInput.trim()) return;
+      
+      const { error } = await supabase
+        .from('lens_models')
+        .insert({ name: newLensInput.trim(), created_by: user.id });
+      
+      if (error) {
+        toast({ title: 'Error adding lens model', description: error.message, variant: 'destructive' });
+      } else {
+        setLensModel(newLensInput.trim());
+        await fetchLensModels();
+        setNewLensDialog(false);
+        setNewLensInput('');
+        toast({ title: 'Lens model added successfully!' });
+      }
+    };
 
     const handleFiles = useCallback((files: FileList | null) => {
       if (!files) return;
@@ -232,30 +306,121 @@ const UploadForm = ({ user }: { user: User }) => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="camera">Camera Model</Label>
-                      <Select value={cameraModel} onValueChange={setCameraModel}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select camera" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="OM-1">OM-1</SelectItem>
-                          <SelectItem value="OM-5">OM-5</SelectItem>
-                          <SelectItem value="E-M1 Mark III">E-M1 Mark III</SelectItem>
-                          <SelectItem value="E-M5 Mark III">E-M5 Mark III</SelectItem>
-                          <SelectItem value="E-M10 Mark IV">E-M10 Mark IV</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Label>Camera Model</Label>
+                      <div className="flex gap-2">
+                        <Popover open={cameraOpen} onOpenChange={setCameraOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={cameraOpen}
+                              className="w-full justify-between"
+                            >
+                              {cameraModel || "Select camera..."}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0">
+                            <Command>
+                              <CommandInput placeholder="Search camera..." />
+                              <CommandEmpty>No camera found.</CommandEmpty>
+                              <CommandGroup>
+                                {cameraModels.map((model) => (
+                                  <CommandItem
+                                    key={model}
+                                    value={model}
+                                    onSelect={(value) => {
+                                      setCameraModel(value);
+                                      setCameraOpen(false);
+                                    }}
+                                  >
+                                    {model}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <Dialog open={newCameraDialog} onOpenChange={setNewCameraDialog}>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="icon">
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Add New Camera Model</DialogTitle>
+                            </DialogHeader>
+                            <Input
+                              placeholder="Enter camera model name"
+                              value={newCameraInput}
+                              onChange={(e) => setNewCameraInput(e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && handleAddNewCamera()}
+                            />
+                            <DialogFooter>
+                              <Button onClick={handleAddNewCamera}>Add Camera</Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="lens">Lens Model</Label>
-                      <Input
-                        id="lens"
-                        value={lensModel}
-                        onChange={(e) => setLensModel(e.target.value)}
-                        placeholder="e.g., M.Zuiko 25mm f/1.8"
-                      />
+                      <Label>Lens Model</Label>
+                      <div className="flex gap-2">
+                        <Popover open={lensOpen} onOpenChange={setLensOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={lensOpen}
+                              className="w-full justify-between"
+                            >
+                              {lensModel || "Select lens..."}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0">
+                            <Command>
+                              <CommandInput placeholder="Search lens..." />
+                              <CommandEmpty>No lens found.</CommandEmpty>
+                              <CommandGroup>
+                                {lensModels.map((model) => (
+                                  <CommandItem
+                                    key={model}
+                                    value={model}
+                                    onSelect={(value) => {
+                                      setLensModel(value);
+                                      setLensOpen(false);
+                                    }}
+                                  >
+                                    {model}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <Dialog open={newLensDialog} onOpenChange={setNewLensDialog}>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="icon">
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Add New Lens Model</DialogTitle>
+                            </DialogHeader>
+                            <Input
+                              placeholder="Enter lens model name"
+                              value={newLensInput}
+                              onChange={(e) => setNewLensInput(e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && handleAddNewLens()}
+                            />
+                            <DialogFooter>
+                              <Button onClick={handleAddNewLens}>Add Lens</Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
                     </div>
                   </div>
 

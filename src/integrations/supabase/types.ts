@@ -50,6 +50,27 @@ export type Database = {
           },
         ]
       }
+      camera_models: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       color_profiles: {
         Row: {
           avg_rating: number | null
@@ -153,6 +174,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      lens_models: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
       }
       profile_images: {
         Row: {
