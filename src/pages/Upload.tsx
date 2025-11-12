@@ -17,6 +17,17 @@ import { User } from '@supabase/supabase-js';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_FILES = 10;
+const ACCEPTED_FILE_TYPE = 'image/jpeg';
+
+interface FileWithPreview {
+  file: File;
+  preview: string;
+  size: string;
+}
 
 const UploadForm = ({ user }: { user: User }) => {
     const navigate = useNavigate();
@@ -29,10 +40,10 @@ const UploadForm = ({ user }: { user: User }) => {
     const [lightingConditions, setLightingConditions] = useState('');
     const [tags, setTags] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState('');
-    const [imageFiles, setImageFiles] = useState<File[]>([]);
-    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+    const [filesWithPreviews, setFilesWithPreviews] = useState<FileWithPreview[]>([]);
     const [loading, setLoading] = useState(false);
     const [dragActive, setDragActive] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
     
     // Camera/Lens model management
     const [cameraModels, setCameraModels] = useState<string[]>([]);
@@ -105,21 +116,78 @@ const UploadForm = ({ user }: { user: User }) => {
       }
     };
 
-    const handleFiles = useCallback((files: FileList | null) => {
+    const formatFileSize = (bytes: number): string => {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    };
+
+    const validateFile = async (file: File): Promise<{ valid: boolean; error?: string }> => {
+      // Check file type
+      if (file.type !== ACCEPTED_FILE_TYPE) {
+        return { valid: false, error: 'Invalid file type. Please upload a JPEG file.' };
+      }
+
+      // Check file size
+      if (file.size > MAX_FILE_SIZE) {
+        return { valid: false, error: 'File too large. Maximum size is 10MB.' };
+      }
+
+      // Validate it's an actual image
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve();
+          img.onerror = () => reject();
+          img.src = URL.createObjectURL(file);
+        });
+      } catch {
+        return { valid: false, error: 'Invalid image file. Please upload a valid JPEG.' };
+      }
+
+      return { valid: true };
+    };
+
+    const handleFiles = useCallback(async (files: FileList | null) => {
       if (!files) return;
 
       const fileArray = Array.from(files);
-      setImageFiles(prev => [...prev, ...fileArray]);
+      
+      // Check max files limit
+      if (filesWithPreviews.length + fileArray.length > MAX_FILES) {
+        toast({
+          title: 'Too many files',
+          description: `Maximum ${MAX_FILES} images per profile`,
+          variant: 'destructive',
+        });
+        return;
+      }
 
-      // Generate previews
-      fileArray.forEach(file => {
+      // Validate and process each file
+      for (const file of fileArray) {
+        const validation = await validateFile(file);
+        
+        if (!validation.valid) {
+          toast({
+            title: 'Validation Error',
+            description: validation.error,
+            variant: 'destructive',
+          });
+          continue;
+        }
+
+        // Generate preview
         const reader = new FileReader();
         reader.onloadend = () => {
-          setImagePreviews(prev => [...prev, reader.result as string]);
+          setFilesWithPreviews(prev => [...prev, {
+            file,
+            preview: reader.result as string,
+            size: formatFileSize(file.size),
+          }]);
         };
         reader.readAsDataURL(file);
-      });
-    }, []);
+      }
+    }, [filesWithPreviews, toast]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       handleFiles(e.target.files);
@@ -146,8 +214,7 @@ const UploadForm = ({ user }: { user: User }) => {
     }, [handleFiles]);
 
     const removeImage = (index: number) => {
-      setImageFiles(prev => prev.filter((_, i) => i !== index));
-      setImagePreviews(prev => prev.filter((_, i) => i !== index));
+      setFilesWithPreviews(prev => prev.filter((_, i) => i !== index));
     };
 
     const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -167,8 +234,9 @@ const UploadForm = ({ user }: { user: User }) => {
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       setLoading(true);
+      setUploadProgress(0);
 
-      if (imageFiles.length === 0) {
+      if (filesWithPreviews.length === 0) {
         toast({ title: 'Please select at least one image', variant: 'destructive' });
         setLoading(false);
         return;
@@ -198,12 +266,14 @@ const UploadForm = ({ user }: { user: User }) => {
 
       // Upload images to storage and collect URLs
       const uploadedUrls: string[] = [];
+      const totalFiles = filesWithPreviews.length;
       
-      for (const file of imageFiles) {
+      for (let i = 0; i < filesWithPreviews.length; i++) {
+        const { file } = filesWithPreviews[i];
         const fileExt = file.name.split('.').pop();
         const fileName = `${user.id}/${profile.id}/${Date.now()}-${Math.random()}.${fileExt}`;
 
-        const { error: uploadError, data } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('profile-images')
           .upload(fileName, file);
 
@@ -217,6 +287,10 @@ const UploadForm = ({ user }: { user: User }) => {
           .getPublicUrl(fileName);
 
         uploadedUrls.push(publicUrl);
+        
+        // Update progress
+        const progress = Math.round(((i + 1) / totalFiles) * 100);
+        setUploadProgress(progress);
       }
 
       if (uploadedUrls.length === 0) {
@@ -243,6 +317,7 @@ const UploadForm = ({ user }: { user: User }) => {
       }
 
       setLoading(false);
+      setUploadProgress(0);
     };
 
     return (
@@ -470,7 +545,12 @@ const UploadForm = ({ user }: { user: User }) => {
 
                 {/* Images Section */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-foreground">Images *</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-foreground">Images *</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {filesWithPreviews.length} / {MAX_FILES} files
+                    </p>
+                  </div>
 
                   <div
                     className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
@@ -484,7 +564,7 @@ const UploadForm = ({ user }: { user: User }) => {
                     <input
                       id="images"
                       type="file"
-                      accept="image/*"
+                      accept={ACCEPTED_FILE_TYPE}
                       multiple
                       onChange={handleFileChange}
                       className="hidden"
@@ -492,10 +572,10 @@ const UploadForm = ({ user }: { user: User }) => {
                     <label htmlFor="images" className="cursor-pointer">
                       <UploadIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                       <p className="text-lg font-medium mb-2">
-                        Drag and drop images here
+                        Drag and drop JPEG images here
                       </p>
                       <p className="text-sm text-muted-foreground mb-4">
-                        or click to browse
+                        or click to browse • Max 10MB per file • Max {MAX_FILES} files
                       </p>
                       <Button type="button" variant="secondary" size="sm">
                         Select Images
@@ -503,24 +583,44 @@ const UploadForm = ({ user }: { user: User }) => {
                     </label>
                   </div>
 
-                  {imagePreviews.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {imagePreviews.map((preview, index) => (
-                        <div key={index} className="relative group">
-                          <img
-                            src={preview}
-                            alt={`Preview ${index + 1}`}
-                            className="w-full h-32 object-cover rounded-lg"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
+                  {filesWithPreviews.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {filesWithPreviews.map((item, index) => (
+                        <div key={index} className="relative group border border-border rounded-lg overflow-hidden">
+                          <div className="flex gap-3 p-3">
+                            <img
+                              src={item.preview}
+                              alt={`Preview ${index + 1}`}
+                              className="w-24 h-24 object-cover rounded"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">
+                                {item.file.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {item.size}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index)}
+                              className="self-start bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {loading && uploadProgress > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Uploading...</span>
+                        <span>{uploadProgress}%</span>
+                      </div>
+                      <Progress value={uploadProgress} />
                     </div>
                   )}
                 </div>
