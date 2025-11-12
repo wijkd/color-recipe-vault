@@ -5,10 +5,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import Header from '@/components/Header';
 import ColorProfileCard from '@/components/ColorProfileCard';
+import ProfileCardSkeleton from '@/components/ProfileCardSkeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -172,8 +174,32 @@ const UserProfile = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-12">
-          <div className="text-center">Loading...</div>
+        <div className="container mx-auto px-4 py-12 max-w-6xl">
+          <Card className="mb-8">
+            <CardContent className="p-8">
+              <div className="flex gap-6 items-start">
+                <Skeleton className="h-24 w-24 rounded-full" />
+                <div className="flex-1 space-y-3">
+                  <Skeleton className="h-8 w-48" />
+                  <Skeleton className="h-4 w-32" />
+                  <div className="flex gap-4">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <ProfileCardSkeleton key={i} />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );

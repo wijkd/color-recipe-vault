@@ -7,7 +7,8 @@ import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Star, Download, ArrowLeft, Bookmark, Eye } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Star, Download, ArrowLeft, Bookmark, Eye, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProfileImage {
@@ -33,6 +34,8 @@ const ProfileDetail = () => {
   const [userRating, setUserRating] = useState<number>(0);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
+  const [commentsLoading, setCommentsLoading] = useState(true);
+  const [downloadingFile, setDownloadingFile] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -85,6 +88,7 @@ const ProfileDetail = () => {
   };
 
   const fetchComments = async () => {
+    setCommentsLoading(true);
     const { data } = await supabase
       .from('comments')
       .select('id, content, created_at, profiles!comments_user_id_fkey(username)')
@@ -92,6 +96,7 @@ const ProfileDetail = () => {
       .order('created_at', { ascending: false });
 
     if (data) setComments(data as any);
+    setCommentsLoading(false);
   };
 
   const fetchUserRating = async () => {
@@ -149,7 +154,34 @@ const ProfileDetail = () => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-6 py-12 max-w-6xl">
+          <Skeleton className="h-10 w-32 mb-8" />
+          <div className="grid lg:grid-cols-2 gap-12 mb-16">
+            <div className="space-y-4">
+              <Skeleton className="aspect-[3/4] w-full" />
+              <div className="grid grid-cols-4 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-square w-full" />
+                ))}
+              </div>
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-12 w-3/4" />
+              <Skeleton className="h-6 w-1/2" />
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-14 w-full" />
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+  
   if (!profile) return <div>{errorMessage ?? 'Profile not found'}</div>;
 
   return (
@@ -266,12 +298,14 @@ const ProfileDetail = () => {
               
               <Button 
                 className="flex-1 h-14 text-base bg-foreground text-background hover:bg-foreground/90 transition-colors"
+                disabled={downloadingFile}
                 onClick={async () => {
                 if (images.length === 0) {
                   toast({ title: 'No image available', variant: 'destructive' });
                   return;
                 }
                 try {
+                  setDownloadingFile(true);
                   // Increment download count
                   await supabase.rpc('increment_download_count', { profile_id: id });
                   
@@ -291,11 +325,22 @@ const ProfileDetail = () => {
                   fetchProfile();
                 } catch (error) {
                   toast({ title: 'Download failed', variant: 'destructive' });
+                } finally {
+                  setDownloadingFile(false);
                 }
               }}
               >
-                <Download className="h-5 w-5 mr-2" />
-                Download for OM Workspace
+                {downloadingFile ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    Downloading...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-5 w-5 mr-2" />
+                    Download for OM Workspace
+                  </>
+                )}
               </Button>
             </div>
           </div>
@@ -322,23 +367,40 @@ const ProfileDetail = () => {
               </div>
             )}
 
-            <div className="space-y-8">
-              {comments.map(comment => (
-                <div key={comment.id} className="pb-8 border-b border-border last:border-0 last:pb-0">
-                  <div className="flex items-baseline gap-3 mb-3">
-                    <div className="font-medium text-foreground">{comment.profiles.username}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {new Date(comment.created_at).toLocaleDateString('en-US', { 
-                        month: 'long', 
-                        day: 'numeric', 
-                        year: 'numeric' 
-                      })}
+            {commentsLoading ? (
+              <div className="space-y-6">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="pb-8 border-b border-border">
+                    <div className="flex items-center gap-3 mb-3">
+                      <Skeleton className="h-5 w-24" />
+                      <Skeleton className="h-4 w-32" />
                     </div>
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-3/4" />
                   </div>
-                  <p className="text-foreground/80 leading-relaxed">{comment.content}</p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : comments.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No comments yet. Be the first to comment!</p>
+            ) : (
+              <div className="space-y-8">
+                {comments.map(comment => (
+                  <div key={comment.id} className="pb-8 border-b border-border last:border-0 last:pb-0">
+                    <div className="flex items-baseline gap-3 mb-3">
+                      <div className="font-medium text-foreground">{comment.profiles.username}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {new Date(comment.created_at).toLocaleDateString('en-US', { 
+                          month: 'long', 
+                          day: 'numeric', 
+                          year: 'numeric' 
+                        })}
+                      </div>
+                    </div>
+                    <p className="text-foreground/80 leading-relaxed">{comment.content}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </main>

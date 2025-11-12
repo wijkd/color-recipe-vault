@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import ColorProfileCard from '@/components/ColorProfileCard';
+import ProfileCardSkeleton from '@/components/ProfileCardSkeleton';
 import { FilterPanel, type Filters } from '@/components/FilterPanel';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -244,7 +245,11 @@ const Index = () => {
         )}
 
         {loading ? (
-          <div className="text-center text-muted-foreground py-20">Loading profiles...</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <ProfileCardSkeleton key={i} />
+            ))}
+          </div>
         ) : filteredProfiles.length === 0 ? (
           <div className="text-center text-muted-foreground py-20">
             {searchQuery || activeFilterCount > 0 ? 'No profiles found matching your filters' : 'No profiles available yet'}

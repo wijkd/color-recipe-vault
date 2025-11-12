@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import Header from '@/components/Header';
 import ColorProfileCard from '@/components/ColorProfileCard';
+import ProfileCardSkeleton from '@/components/ProfileCardSkeleton';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Bookmark } from 'lucide-react';
@@ -91,8 +92,13 @@ const Bookmarks = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="container mx-auto px-6 py-16 text-center">
-          <p>Loading bookmarks...</p>
+        <main className="container mx-auto px-6 py-16 max-w-7xl">
+          <h1 className="text-6xl font-display font-medium mb-12 text-center">My Bookmarks</h1>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <ProfileCardSkeleton key={i} />
+            ))}
+          </div>
         </main>
       </div>
     );
