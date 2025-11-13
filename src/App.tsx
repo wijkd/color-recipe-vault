@@ -13,6 +13,7 @@ import ProfileDetail from "./pages/ProfileDetail";
 import Upload from "./pages/Upload";
 import Bookmarks from "./pages/Bookmarks";
 import UserProfile from "./pages/UserProfile";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,14 +33,15 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/profile/:id" element={<ProfileDetail />} />
-                <Route path="/upload" element={<Upload />} />
-                <Route path="/bookmarks" element={<Bookmarks />} />
-                <Route path="/user/:userId" element={<UserProfile />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/profile/:id" element={<ProfileDetail />} />
+              <Route path="/upload" element={<Upload />} />
+              <Route path="/bookmarks" element={<Bookmarks />} />
+              <Route path="/user/:userId" element={<UserProfile />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>

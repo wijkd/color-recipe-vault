@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Camera, Upload, LogOut, LogIn, Bookmark, Edit } from 'lucide-react';
+import { Camera, Upload, LogOut, LogIn, Bookmark, Edit, Shield } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const Header = () => {
   const { user, signOut } = useAuth();
-  const { isContributor } = useUserRole();
+  const { isContributor, isAdmin } = useUserRole();
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -86,6 +86,14 @@ const Header = () => {
                   <span className="hidden sm:inline">Bookmarks</span>
                 </Button>
               </Link>
+              {isAdmin && (
+                <Link to="/admin">
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <Shield className="h-4 w-4" />
+                    <span className="hidden sm:inline">Admin</span>
+                  </Button>
+                </Link>
+              )}
               {isContributor && (
                 <Link to="/upload">
                   <Button variant="ghost" size="sm" className="gap-2">
