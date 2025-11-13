@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import Header from '@/components/Header';
+import SEO from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -186,6 +187,13 @@ const ProfileDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title={`${profile.name} - OM System Color Profile`}
+        description={`${profile.description || 'Professional color profile'} - Created by ${profile.profiles?.username || 'photographer'}. ${profile.camera_model ? `Optimized for ${profile.camera_model}.` : ''} Rated ${profile.avg_rating ? profile.avg_rating.toFixed(1) : 'New'} stars.`}
+        image={images.length > 0 ? images[0].image_url : undefined}
+        url={`/profile/${id}`}
+        type="article"
+      />
       <Header />
       
       <main className="container mx-auto px-6 py-12 max-w-6xl">

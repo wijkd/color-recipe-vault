@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import Header from '@/components/Header';
+import SEO from '@/components/SEO';
 import ColorProfileCard from '@/components/ColorProfileCard';
 import ProfileCardSkeleton from '@/components/ProfileCardSkeleton';
 import { Button } from '@/components/ui/button';
@@ -75,6 +76,11 @@ const Bookmarks = () => {
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
+        <SEO
+          title="My Bookmarks - OM Profiles"
+          description="View your saved color profiles for OM System cameras"
+          url="/bookmarks"
+        />
         <Header />
         <main className="container mx-auto px-6 py-16 text-center">
           <Bookmark className="h-16 w-16 mx-auto mb-6 text-muted-foreground" />
@@ -91,6 +97,11 @@ const Bookmarks = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
+        <SEO
+          title="My Bookmarks - OM Profiles"
+          description="View your saved color profiles for OM System cameras"
+          url="/bookmarks"
+        />
         <Header />
         <main className="container mx-auto px-6 py-16 max-w-7xl">
           <h1 className="text-6xl font-display font-medium mb-12 text-center">My Bookmarks</h1>
@@ -106,6 +117,11 @@ const Bookmarks = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="My Bookmarks - OM Profiles"
+        description="View your saved color profiles for OM System cameras"
+        url="/bookmarks"
+      />
       <Header />
       <main className="container mx-auto px-6 py-16 max-w-7xl">
         <div className="mb-12">
