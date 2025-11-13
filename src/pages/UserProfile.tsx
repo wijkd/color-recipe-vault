@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import Header from '@/components/Header';
+import SEO from '@/components/SEO';
 import ColorProfileCard from '@/components/ColorProfileCard';
 import ProfileCardSkeleton from '@/components/ProfileCardSkeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -173,6 +174,11 @@ const UserProfile = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
+        <SEO
+          title="User Profile - OM Profiles"
+          description="View photographer's color profiles for OM System cameras"
+          url={`/user/${userId}`}
+        />
         <Header />
         <div className="container mx-auto px-4 py-12 max-w-6xl">
           <Card className="mb-8">
@@ -208,6 +214,11 @@ const UserProfile = () => {
   if (!profile) {
     return (
       <div className="min-h-screen bg-background">
+        <SEO
+          title="User Profile - OM Profiles"
+          description="View photographer's color profiles for OM System cameras"
+          url={`/user/${userId}`}
+        />
         <Header />
         <div className="container mx-auto px-4 py-12">
           <div className="text-center">User not found</div>
@@ -221,6 +232,11 @@ const UserProfile = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title={`${profile.username || 'User'}'s Color Profiles - OM Profiles`}
+        description={`Explore ${stats.totalProfiles} color ${stats.totalProfiles === 1 ? 'profile' : 'profiles'} created by ${profile.username || 'photographer'} for OM System cameras. ${stats.avgRating > 0 ? `Average rating: ${stats.avgRating.toFixed(1)} stars.` : ''}`}
+        url={`/user/${userId}`}
+      />
       <Header />
       
       <div className="container mx-auto px-4 py-12 max-w-6xl">

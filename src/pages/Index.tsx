@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
+import SEO from '@/components/SEO';
 import ColorProfileCard from '@/components/ColorProfileCard';
 import ProfileCardSkeleton from '@/components/ProfileCardSkeleton';
 import { FilterPanel, type Filters } from '@/components/FilterPanel';
@@ -140,6 +141,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="OM Profiles - Share Color Profiles for OM System Cameras"
+        description="Discover and share beautiful color profiles for OM System cameras. Download professional color grading presets created by photographers worldwide."
+        url="/"
+      />
       <Header />
       
       <main className="container mx-auto px-6 py-16 max-w-7xl">
