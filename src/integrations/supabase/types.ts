@@ -89,6 +89,7 @@ export type Database = {
           updated_at: string
           user_id: string
           view_count: number
+          visible: boolean
         }
         Insert: {
           avg_rating?: number | null
@@ -107,6 +108,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           view_count?: number
+          visible?: boolean
         }
         Update: {
           avg_rating?: number | null
@@ -125,6 +127,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           view_count?: number
+          visible?: boolean
         }
         Relationships: [
           {
@@ -228,6 +231,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          banned: boolean
           created_at: string
           id: string
           instagram_url: string | null
@@ -237,6 +241,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          banned?: boolean
           created_at?: string
           id: string
           instagram_url?: string | null
@@ -246,6 +251,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          banned?: boolean
           created_at?: string
           id?: string
           instagram_url?: string | null
@@ -290,6 +296,41 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reports: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          profile_id: string
+          reason: string
+          reporter_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          profile_id: string
+          reason: string
+          reporter_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          profile_id?: string
+          reason?: string
+          reporter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "color_profiles"
             referencedColumns: ["id"]
           },
         ]
