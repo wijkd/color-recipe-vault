@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Search, ChevronLeft, ChevronRight, Star, Trash2 } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Star, Trash2, EyeOff, Eye, ShieldAlert, UserX } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 
@@ -27,7 +27,8 @@ interface Profile {
   download_count: number;
   avg_rating: number | null;
   featured: boolean;
-  profiles: { username: string } | null;
+  visible: boolean;
+  profiles: { username: string; banned: boolean } | null;
 }
 
 const AdminProfiles = () => {
@@ -36,6 +37,7 @@ const AdminProfiles = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteProfile, setDeleteProfile] = useState<{ id: string; name: string } | null>(null);
+  const [banUser, setBanUser] = useState<{ id: string; username: string } | null>(null);
   const { toast } = useToast();
   const itemsPerPage = 10;
 
@@ -50,7 +52,7 @@ const AdminProfiles = () => {
   const fetchProfiles = async () => {
     const { data } = await supabase
       .from('color_profiles')
-      .select('id, name, user_id, created_at, download_count, avg_rating, featured, profiles!color_profiles_user_id_fkey(username)')
+      .select('id, name, user_id, created_at, download_count, avg_rating, featured, visible, profiles!color_profiles_user_id_fkey(username, banned)')
       .order('created_at', { ascending: false });
 
     if (data) setProfiles(data as any);
@@ -113,6 +115,58 @@ const AdminProfiles = () => {
     setDeleteProfile(null);
   };
 
+  const handleToggleVisibility = async (id: string, currentVisible: boolean) => {
+    const { error } = await supabase
+      .from('color_profiles')
+      .update({ visible: !currentVisible })
+      .eq('id', id);
+
+    if (error) {
+      toast({ title: 'Error updating visibility', variant: 'destructive' });
+    } else {
+      toast({ title: `Profile ${!currentVisible ? 'shown' : 'hidden'}` });
+      fetchProfiles();
+    }
+  };
+
+  const handleDismissReports = async (profileId: string) => {
+    const { error } = await supabase
+      .from('reports')
+      .delete()
+      .eq('profile_id', profileId);
+
+    if (error) {
+      toast({ title: 'Error dismissing reports', variant: 'destructive' });
+    } else {
+      // Make profile visible again
+      await supabase
+        .from('color_profiles')
+        .update({ visible: true })
+        .eq('id', profileId);
+      
+      toast({ title: 'Reports dismissed and profile restored' });
+      fetchProfiles();
+    }
+  };
+
+  const handleBanUser = async () => {
+    if (!banUser) return;
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ banned: true })
+      .eq('id', banUser.id);
+
+    if (error) {
+      toast({ title: 'Error banning user', variant: 'destructive' });
+    } else {
+      toast({ title: `User ${banUser.username} has been banned` });
+      fetchProfiles();
+    }
+
+    setBanUser(null);
+  };
+
   const paginatedProfiles = filteredProfiles.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -146,6 +200,7 @@ const AdminProfiles = () => {
                   <TableHead>Upload Date</TableHead>
                   <TableHead>Downloads</TableHead>
                   <TableHead>Rating</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Featured</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -154,7 +209,14 @@ const AdminProfiles = () => {
                 {paginatedProfiles.map((profile) => (
                   <TableRow key={profile.id}>
                     <TableCell className="font-medium">{profile.name}</TableCell>
-                    <TableCell>{profile.profiles?.username || 'Unknown'}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {profile.profiles?.username || 'Unknown'}
+                        {profile.profiles?.banned && (
+                          <Badge variant="destructive" className="text-xs">Banned</Badge>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       {new Date(profile.created_at).toLocaleDateString()}
                     </TableCell>
@@ -166,25 +228,67 @@ const AdminProfiles = () => {
                       </div>
                     </TableCell>
                     <TableCell>
+                      {profile.visible ? (
+                        <Badge variant="outline" className="text-xs">Visible</Badge>
+                      ) : (
+                        <Badge variant="secondary" className="text-xs">Hidden</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
                       <Switch
                         checked={profile.featured}
                         onCheckedChange={() => handleToggleFeatured(profile.id, profile.featured)}
                       />
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeleteProfile({ id: profile.id, name: profile.name })}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleToggleVisibility(profile.id, profile.visible)}
+                          title={profile.visible ? 'Hide profile' : 'Show profile'}
+                        >
+                          {profile.visible ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                        {!profile.visible && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDismissReports(profile.id)}
+                            title="Dismiss reports and restore"
+                          >
+                            <ShieldAlert className="h-4 w-4 text-green-600" />
+                          </Button>
+                        )}
+                        {!profile.profiles?.banned && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setBanUser({ id: profile.user_id, username: profile.profiles?.username || 'Unknown' })}
+                            title="Ban user"
+                          >
+                            <UserX className="h-4 w-4 text-orange-600" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeleteProfile({ id: profile.id, name: profile.name })}
+                          title="Delete profile"
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
                 {paginatedProfiles.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                       No profiles found
                     </TableCell>
                   </TableRow>
@@ -233,6 +337,23 @@ const AdminProfiles = () => {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!banUser} onOpenChange={() => setBanUser(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ban User</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to ban user "{banUser?.username}"? They will no longer be able to upload profiles.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleBanUser} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Ban User
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -638,13 +638,54 @@ const UploadForm = ({ user }: { user: User }) => {
 const Upload = () => {
     const { user, loading: authLoading } = useAuth();
     const { isContributor, loading: roleLoading } = useUserRole();
+    const [banned, setBanned] = useState(false);
+    const [banCheckLoading, setBanCheckLoading] = useState(true);
 
-    if (authLoading || roleLoading) {
+    useEffect(() => {
+      const checkBanStatus = async () => {
+        if (user) {
+          const { data } = await supabase
+            .from('profiles')
+            .select('banned')
+            .eq('id', user.id)
+            .single();
+          
+          if (data) {
+            setBanned(data.banned);
+          }
+        }
+        setBanCheckLoading(false);
+      };
+      
+      checkBanStatus();
+    }, [user]);
+
+    if (authLoading || roleLoading || banCheckLoading) {
       return (
         <div className="min-h-screen bg-background">
           <Header />
           <div className="container mx-auto px-4 py-8 text-center">
             <p>Loading...</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (banned) {
+      return (
+        <div className="min-h-screen bg-background">
+          <Header />
+          <div className="container mx-auto px-4 py-8 text-center">
+            <Card className="max-w-md mx-auto">
+              <CardHeader>
+                <CardTitle>Account Restricted</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Your account has been restricted. Contact support at support@omprofiles.com for assistance.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       );

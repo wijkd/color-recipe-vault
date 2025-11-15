@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import Header from '@/components/Header';
 import SEO from '@/components/SEO';
+import ReportModal from '@/components/ReportModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -294,7 +295,8 @@ const ProfileDetail = () => {
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 items-start">
+              <ReportModal profileId={id!} />
               <Button 
                 variant="outline"
                 size="icon"
