@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import SEO from '@/components/SEO';
@@ -283,6 +284,25 @@ const Index = () => {
           </div>
         )}
       </main>
+      
+      <footer className="border-t border-border bg-card/50 mt-20">
+        <div className="container mx-auto px-6 py-8 max-w-7xl">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+            <p>© 2024 OM Color Profiles. All rights reserved.</p>
+            <div className="flex gap-6">
+              <Link to="/about" className="hover:text-foreground transition-colors">
+                About
+              </Link>
+              <Link to="/resources" className="hover:text-foreground transition-colors">
+                Resources
+              </Link>
+              <Link to="/contact" className="hover:text-foreground transition-colors">
+                Contact Us
+              </Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

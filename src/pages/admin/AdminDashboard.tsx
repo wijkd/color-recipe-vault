@@ -6,10 +6,11 @@ import Header from '@/components/Header';
 import SEO from '@/components/SEO';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Image, Download, TrendingUp } from 'lucide-react';
+import { Users, Image, Download, TrendingUp, Mail } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import AdminUsers from './AdminUsers';
 import AdminProfiles from './AdminProfiles';
+import AdminMessages from './AdminMessages';
 
 interface Stats {
   totalUsers: number;
@@ -117,6 +118,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="profiles">Profiles</TabsTrigger>
+            <TabsTrigger value="messages">Messages</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -222,6 +224,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="profiles">
             <AdminProfiles />
+          </TabsContent>
+
+          <TabsContent value="messages">
+            <AdminMessages />
           </TabsContent>
         </Tabs>
       </main>
