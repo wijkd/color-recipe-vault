@@ -65,6 +65,7 @@ const Index = () => {
         profile_images (image_url),
         profiles!color_profiles_user_id_fkey (username)
       `)
+      .eq('visible', true)
       .order('created_at', { ascending: false });
 
     if (!error && data) {
