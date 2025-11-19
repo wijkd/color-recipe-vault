@@ -7,6 +7,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "./hooks/useAuth";
 import { ErrorFallback } from "./components/ErrorFallback";
+import VersionIndicator from "./components/VersionIndicator";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ProfileDetail from "./pages/ProfileDetail";
@@ -34,6 +35,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <VersionIndicator />
             <BrowserRouter>
               <Routes>
               <Route path="/" element={<Index />} />
