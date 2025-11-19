@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { getSafeUsername } from '@/lib/userDisplay';
 
 interface ColorProfile {
   id: string;
@@ -272,7 +273,7 @@ const Index = () => {
                 imageUrl={profile.profile_images[0]?.image_url || '/placeholder.svg'}
                 averageRating={profile.avg_rating}
                 totalRatings={profile.total_ratings}
-                username={profile.profiles?.username || 'Unknown'}
+                username={getSafeUsername(profile.profiles?.username)}
                 userId={profile.user_id}
                 description={profile.description}
                 category={profile.category}
