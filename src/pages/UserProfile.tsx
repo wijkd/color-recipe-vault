@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Instagram, Globe, Calendar, Image, Download, Star, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { getSafeUsername } from '@/lib/userDisplay';
 
 interface UserProfile {
   id: string;
@@ -233,8 +234,8 @@ const UserProfile = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title={`${profile.username || 'User'}'s Color Profiles - OM Profiles`}
-        description={`Explore ${stats.totalProfiles} color ${stats.totalProfiles === 1 ? 'profile' : 'profiles'} created by ${profile.username || 'photographer'} for OM System cameras. ${stats.avgRating > 0 ? `Average rating: ${stats.avgRating.toFixed(1)} stars.` : ''}`}
+        title={`${getSafeUsername(profile.username, 'User')}'s Color Profiles - OM Profiles`}
+        description={`Explore ${stats.totalProfiles} color ${stats.totalProfiles === 1 ? 'profile' : 'profiles'} created by ${getSafeUsername(profile.username, 'photographer')} for OM System cameras. ${stats.avgRating > 0 ? `Average rating: ${stats.avgRating.toFixed(1)} stars.` : ''}`}
         url={`/user/${userId}`}
       />
       <Header />
@@ -401,7 +402,7 @@ const UserProfile = () => {
                     imageUrl={profile.profile_images[0]?.image_url || ''}
                     averageRating={profile.avg_rating}
                     totalRatings={profile.total_ratings}
-                    username={profile.profiles?.username || 'Anonymous'}
+                    username={getSafeUsername(profile.profiles?.username)}
                     userId={profile.user_id}
                     description={profile.description}
                     category={profile.category}
@@ -440,7 +441,7 @@ const UserProfile = () => {
                       imageUrl={profile.profile_images[0]?.image_url || ''}
                       averageRating={profile.avg_rating}
                       totalRatings={profile.total_ratings}
-                      username={profile.profiles?.username || 'Anonymous'}
+                      username={getSafeUsername(profile.profiles?.username)}
                       userId={profile.user_id}
                       description={profile.description}
                       category={profile.category}

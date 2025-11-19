@@ -9,6 +9,7 @@ import ProfileCardSkeleton from '@/components/ProfileCardSkeleton';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Bookmark } from 'lucide-react';
+import { getSafeUsername } from '@/lib/userDisplay';
 
 interface ColorProfile {
   id: string;
@@ -152,7 +153,7 @@ const Bookmarks = () => {
                 imageUrl={profile.profile_images[0]?.image_url || ''}
                 averageRating={profile.avg_rating}
                 totalRatings={profile.total_ratings}
-                username={profile.profiles?.username || 'Unknown'}
+                username={getSafeUsername(profile.profiles?.username)}
                 userId={profile.user_id}
                 description={profile.description}
                 category={profile.category}

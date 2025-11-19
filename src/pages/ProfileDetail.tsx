@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Star, Download, ArrowLeft, Bookmark, Eye, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { getSafeUsername } from '@/lib/userDisplay';
 
 interface ProfileImage {
   id: string;
@@ -190,7 +191,7 @@ const ProfileDetail = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title={`${profile.name} - OM System Color Profile`}
-        description={`${profile.description || 'Professional color profile'} - Created by ${profile.profiles?.username || 'photographer'}. ${profile.camera_model ? `Optimized for ${profile.camera_model}.` : ''} Rated ${profile.avg_rating ? profile.avg_rating.toFixed(1) : 'New'} stars.`}
+        description={`${profile.description || 'Professional color profile'} - Created by ${getSafeUsername(profile.profiles?.username, 'photographer')}. ${profile.camera_model ? `Optimized for ${profile.camera_model}.` : ''} Rated ${profile.avg_rating ? profile.avg_rating.toFixed(1) : 'New'} stars.`}
         image={images.length > 0 ? images[0].image_url : undefined}
         url={`/profile/${id}`}
         type="article"
@@ -241,10 +242,10 @@ const ProfileDetail = () => {
                     to={`/user/${profile.user_id}`}
                     className="hover:text-foreground transition-colors hover:underline"
                   >
-                    {profile.profiles?.username || 'Unknown user'}
+                    {getSafeUsername(profile.profiles?.username, 'Unknown user')}
                   </Link>
                 ) : (
-                  profile.profiles?.username || 'Unknown user'
+                  getSafeUsername(profile.profiles?.username, 'Unknown user')
                 )}
               </p>
               <p className="text-lg text-foreground/80 mb-8 leading-relaxed">{profile.description}</p>
@@ -397,7 +398,7 @@ const ProfileDetail = () => {
                 {comments.map(comment => (
                   <div key={comment.id} className="pb-8 border-b border-border last:border-0 last:pb-0">
                     <div className="flex items-baseline gap-3 mb-3">
-                      <div className="font-medium text-foreground">{comment.profiles.username}</div>
+                      <div className="font-medium text-foreground">{getSafeUsername(comment.profiles.username, 'Anonymous')}</div>
                       <div className="text-sm text-muted-foreground">
                         {new Date(comment.created_at).toLocaleDateString('en-US', { 
                           month: 'long', 
